@@ -1,0 +1,10 @@
+﻿@using Task_111.Models
+@model GL_CHART_OF_ACCOUNTS
+
+<form asp-controller="ChartOfAccount" asp-action="UpdateChartAccount" method="post">
+    <input type="hidden" name="id" value="@Model.CONTROL_ACCOUNT_ID" />
+    <div class="form-group">
+        <input type="text" placeholder="Account Discription" name="desc" class="form-control"  value="@Model.DESCRIPTION"/>
+    </div>
+    <button type="submit" class="btn btn-primary">Save changes</button>
+</form>

@@ -1,0 +1,226 @@
+﻿@{
+    ViewData["Title"] = "ChartAccountsList";
+}
+@section css{
+    <link href="~/css/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/Tree/themes/default/style.css" rel="stylesheet" />
+}
+
+<h4><span style="font-size:20px;color:cornflowerblue"><strong style="font-size:28px;">M</strong>aintain</span><small> >> </small> General Ladger <small>>></small>  Chart of Account</h4>
+<br />
+<hr />
+
+<!-- Tree show here-->
+<div id="tree-contaner">
+    @*<div id="tree">
+    </div>*@
+</div>
+
+@*<partial name="~/Views/ChartOfAccount/_Showtree.cshtml" />*@
+
+<!-- Modal Start here ... -->
+<div class="modal inmodal" id="myModal4" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body" id="Model-Body">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- add chaild model here -->
+<div class="modal inmodal" id="chaildmodel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body" id="chidbody">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/js/sweetalert2.all.js"></script>
+    <script src="~/Tree/jstree.js"></script>>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            Showtree();
+            
+            
+
+          //  Showtree();
+           
+
+        })
+        // for Creating childe     
+       
+
+        var childSubling = function (id) {
+            $.ajax({
+                method: "GET",
+                url: "/ChartOfAccount/AddChartAccount/" + id
+            }).done(function (result) {
+                $("#chidbody").html(result)
+                $("#chaildmodel").modal();
+            });
+        }
+        var Chartofchild = function (id) {
+            $.ajax({
+                method: "GET",
+                url: "/ChartOfAccount/AddControlAccount/" + id
+
+            }).done(function (result) {
+                $("#chidbody").html(result)
+                $("#chaildmodel").modal();              
+            });
+        }
+
+        var UpdateAccount = function (id) {
+
+            $.ajax({
+                method: "GET",
+                url: "/ChartOfAccount/UpdateControlAccount/" + id
+
+            }).done(function (result) {
+                $("#chidbody").html(result)
+                $("#chaildmodel").modal();
+            });
+        }
+
+        var EditChartAccount = function (id) {
+
+            $.ajax({
+                method: "GET",
+                url: "/ChartOfAccount/UpdateChartAccount/" + id
+
+            }).done(function (result) {
+                $("#chidbody").html(result)
+                $("#chaildmodel").modal();
+            });
+        }
+
+        var ControlSubling = function (id) {
+
+            $.ajax({
+                method: "GET",
+                url: "/ChartOfAccount/AddControl/" + id
+
+            }).done(function (result) {
+                $("#chidbody").html(result)
+                $("#chaildmodel").modal();
+            });
+        }
+        var DeleteControlAccount = function (id) {
+            $.ajax({
+
+                method: "Delete",
+                url: "/ChartOfAccount/DeleteParentNode/" + id,
+                success: function (res) {
+                    
+                    swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Deleted Successfully',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });                 
+                  
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            })
+        }  
+
+      
+        var Showtree = function ()
+        {
+            $.ajax({
+                
+                url: "/ChartOfAccount/Showtree",
+                type:"Get",
+                success: function (res)
+                {
+                    $("#tree-contaner").html(res)
+                   tree()
+                   // $('#tree').jstree("destroy").empty();
+
+                    $('#tree').on("changed.jstree", function (e, data, ) {
+                        var id = data.node.id;
+                        var c_Id;
+                        //Remove the ParentId.
+                        if (data.node.id.indexOf('-') != -1) {
+                            var c = data.node.id.match(/-/g).length
+                            c_Id = data.node.id.split("-")[c];
+                            id = data.node.id.split("-")[c - 1];
+                            $("#myModal4").modal();
+                            $("#Model-Body").html(
+                                `<div class="row">
+                                                    <div ></div>
+                                                    <button class="col-lg-4 btn btn-success" type="button" onclick="childSubling(${id})" >Add</button>
+                                                    <button class="col-lg-4 btn btn-primary" data-dismiss="modal"type="button" disabled>Add Child</button>
+                                                    <button class="col-lg-4 btn btn-info" type="button" data-dismiss="modal" onclick="EditChartAccount(${c_Id})">Edit</button>
+                                                </div>
+                                                   <br/>
+                                                 <div class="row">
+                                                    <div ></div>
+                                                    <a class=" col-lg-4 btn btn-danger" href="/ChartOfAccount/DeleteNode/${c_Id}" role="button">Delete</a>
+                                                   <!-- <button class="col-lg-4 btn btn-danger" type="button"> <a href="/ChartOfAccount/DeleteNode/${c_Id}">Delete</a></button>-->
+                                                    <button class="col-lg-4 btn btn-warning" type="button" data-dismiss="modal">Cancle</button>
+                                                </div>`
+                            );
+                        }
+                        else {
+
+                            $("#myModal4").modal();
+                            $("#Model-Body").html(
+                                `<div class="row">
+                                                    <div ></div>
+                                                    <button class="col-lg-4 btn btn-success" type="button" data-dismiss="modal" onclick="ControlSubling(${id})">Add</button>
+                                                    <button class="col-lg-4 btn btn-primary" data-dismiss="modal"type="button" onclick="Chartofchild(${id})">Add Child</button>
+                                                    <button class="col-lg-4 btn btn-info" type="button" data-dismiss="modal" onclick="UpdateAccount(${id})" >Edit</button>
+                                                </div>
+                                                   <br/>
+                                                 <div class="row">
+                                                    <div ></div>
+                                                    <a class=" col-lg-4 btn btn-danger" href="return:false" data-dismiss="modal" onclick="DeleteControlAccount(${id})" role="button">Delete</a>
+                                                    <button class="col-lg-4 btn btn-warning" type="button" data-dismiss="modal">Cancle</button>
+                                                </div>`
+                            );
+                        }
+                    });   
+                   // var aa = $('#tree').jstree(true).refresh_node("id")
+                  //  alert(aa)
+                    
+                }
+
+            })
+        }
+        var tree = function () {
+            $("#tree").jstree({
+                'core': {
+                    "themes": {
+                        "variant": "large"
+                    },
+                    'data': {
+                        'url': '/ChartOfAccount/tree/',
+                        'data': function (node) {
+                            return { 'id': node.id };
+                        }
+                    }
+                },
+            }); 
+
+        }
+       
+    </script>
+
+
+}
